@@ -1,0 +1,185 @@
+<div id="tmp_menu">
+	<ul>
+		<li id="btnPerfil"><a href="#Clientes">Gestionar clientes</a></li>
+	</ul>
+	<img src="../img/menu-background.png">
+</div>
+
+<div id="div_cont_cliente" style="diplay:none">
+</div>
+<script type="text/template" id="tmp_gestion_cliente">
+		<div>
+			<fieldset>
+			<legend>Información cliente</legend>
+			<table>
+				<tbody>
+					<tr>
+						<td><label>Cedula:</label></td>
+						<td><input type="text" name="ced" value=""></td>
+					</tr>
+					<tr>
+						<td><label>Nombre:</label></td>
+						<td><input type="text" name="nombre" value=""></td>
+					</tr>
+					<tr>
+						<td><label>Primer Apellido:</label></td>
+						<td><input type="text" name="ape_1" value=""></td>
+					</tr>
+					<tr>
+						<td><label>Segundo Apellido:</label></td>
+						<td><input type="text" name="ape_2" value=""></td>
+					</tr>
+					<tr>
+						<td><label>Nombre Empresa:</label></td>
+						<td><input type="text" name="nom_emp"></td>
+					</tr>
+					<tr>
+						<td><label>Dirección:</label></td>
+						<td><input type="text" name="direccion"></td>
+					</tr>
+					<tr>
+						<td><label>Télefono:</label></td>
+						<td><input type="text" name="telefono"></td>
+					</tr>
+					<tr>
+						<td><label>E-Mail:</label></td>
+						<td><input type="text" name="mail"></td>
+					</tr>
+				</tbody>
+			</table>
+	 		</fieldset>
+	 		<input type="button" id="btnAgregar" class="button" value="+ agregar"/>
+
+	 		</br>
+	 		</br>
+			<div class="error" style="display:none" id='error'></div>
+			<div class="exito" style="display:none" id='exito'></div>
+		</div>
+		<div id="cont-lista">
+			<h2>Lista Clientes</h2>
+			<p>
+				<label>Buscar:</label> 
+				<input type="radio" name="rbCliente" id="rbNombre" value="nombre" checked> Nombre
+				<input type="radio" name="rbCliente" id="rbCedula" value="cedula" > Cedula
+				<input type="radio" name="rbCliente" id="rbEmpresa" value="empresa"> Empresa
+				<input type="text" id="txtBuscar" value="">
+			</p>
+			<div id="cont-clientes">
+				<div id="lista-clientes" style="display:none;">
+				</div>
+				<div id="detalle-cliente" style="display:none;">
+				</div>
+			</div>
+		</div>
+
+
+</script>
+
+<script type="text/x-handlebars-template" id="item-cliente">
+	<div id="cont-item-cliente">
+			<div class="item-cli" value={{_id}}>
+			<label>Cédula:</label>{{cli_ced}}  </br>
+			<label>Nombre:</label>{{cli_nombre}}  </br>
+			<label>Primer apellido:</label>{{cli_ape_1}}  </br>
+			<label>Segundo apellido:</label>{{cli_ape_2}}  </br>
+			<label>Nombre Empresa:</label>{{cli_nom_emp}}  </br>
+			<label>Dirección:</label>{{cli_direccion}}  </br>
+			<label>Télefono:</label>{{cli_telefono}}  </br>
+			<label>E-Mail:</label>{{cli_mail}}  </br>
+			<p>
+				<input type="button" id={{_id}} class="button eliminar  btnEliminar"  value="eliminar">
+				<input type="button" id={{_id}} class="button  btnEditar" value="editar">
+			</p>
+			<script type="text/javascript">
+				$('.btnEliminar').click(function(){
+
+					var id = $(this).attr('id');
+					$.post('/clientes/eliminarCliente',{id:id},function(data){
+						if(!data){
+						}else{
+							$('.item-cli').each(function(){
+								_id= $(this).attr('value');
+								if(id==_id){
+									$(this).remove().show(1000);
+
+									//EXTRA
+									id_detalle = $('#_id').attr('value');
+									
+									if(id_detalle == _id){
+										$('#detalle-cliente').empty();
+									}
+									return;
+								}
+							});
+						}
+					});
+				});
+
+				$('.btnEditar').click(function(){
+
+					var id = $(this).attr('id');
+					$.post('/clientes/getCliente',{id:id},function(data){
+						if(!data){
+						}else{
+							$('#detalle-cliente').empty();
+							tmp = $('#item-detalle').html();
+							html = Handlebars.compile(tmp);
+							$('#detalle-cliente').html(html(data)).show(1000);
+						}
+					});
+								
+				});
+			</script>
+		</div>
+	</div>
+</script>
+
+<script type="text/x-handlebars-template" id="item-detalle">
+	<div id="cont-item-detalle">
+			<table>
+				<tbody>
+					<tr>
+						<td><label>Cédula:  </label></td>
+						<td><input type="text" id="ced_editar" value="{{cli_ced}}"></td>
+					</tr>
+					<tr>
+						<td><label>Nombre:  </label></td>
+						<td><input type="text" id="nombre_editar" value="{{cli_nombre}}"></td>
+					</tr>
+					<tr>
+						<td><label>Primer Apellido:  </label></td>
+						<td><input type="text" id="ape_1_editar" value="{{cli_ape_1}}"></td>
+					</tr>
+					<tr>
+						<td><label>Segundo Apellido:  </label></td>
+						<td><input type="text" id="ape_2_editar" value="{{cli_ape_2}}"></td>
+					</tr>
+					<tr>
+						<td><label>Nombre Empresa:  </label></td>
+						<td><input type="text" id="nom_emp_editar" value="{{cli_nom_emp}}"></td>
+					</tr>
+					<tr>
+						<td><label>Dirección:  </label></td>
+						<td><input type="text" id="direccion_editar" value="{{cli_direccion}}"></td>
+					</tr>
+					<tr>
+						<td><label>Télefono:  </label></td>
+						<td><input type="text" id="telefono_editar" value="{{cli_telefono}}"></td>
+					</tr>
+					<tr>
+						<td><label>E-Mail:  </label></td>
+						<td><input type="text" id="mail_editar" value="{{cli_mail}}"></td>
+					</tr>
+					<tr><td></td><td></td></tr>
+					<tr>
+						<td></td><td><input type="button" id="btnGuardar" value="guardar" class="button"/></td>
+					</tr>
+				</tbody>
+			</table>
+			</br>
+			</br>
+			<div class="error" style="display:none" id='error_editar'></div>
+			<div class="exito" style="display:none" id='exito_editar'></div>
+	 		<input type="hidden" value={{_id}} id="_id">
+	</div>
+</script>

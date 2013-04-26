@@ -1,0 +1,707 @@
+<div id="tmp_menu">
+	<ul>
+		<li id="btnPerfil"><a href="#Bitacoras">Gestionar bitácoras</a></li>
+		<li id="btnExtraerCont"><a href="#Bitacoras">Extraer bitácoras</a></li>
+	</ul>
+	<img src="../img/menu-background.png">
+</div>
+
+<div id="div_cont_bitacoras" style="display:none;">
+</div>
+
+<script type="text/template" id="tmp_bitacora">
+	<div id="cont-crear-bitacora">
+		
+		<div id="div-info-bitacora">
+			<div id="info-bitacora">
+				<fieldset>
+					<legend>Información bitácora</legend>
+					<table>
+						<tbody>
+							<tr>
+								<td><label>Encargado:</label></td>
+								<td><input type="text" name="nombre"></td>
+							</tr>
+							<tr>
+								<td><label>Descripción:</label></td>
+								<td><input type="text" name="desc"></td>
+							</tr>
+							<tr>
+								<td><label>Fecha:</label></td>
+								<td><input type="date" name="fecha"></td>
+							</tr>
+							<tr>
+								<td><label>Inicio:</label></td>
+								<td><input type="time" name="hra_inicio" ></td>
+							</tr>
+							<tr>
+								<td><label>Final:</label></td>
+								<td><input type="time" name="hra_final" value="12:00" id="hra_final" disabled></td>
+							</tr>
+							<tr>
+								<td><label>Dirección:</label></td>
+								<td><input type="text" name="dir"></td>
+							</tr>
+							<tr>
+								<td><label>Participantes:</label></td>
+								<td><input type="number" min="1" name="participantes" value="1"></td>
+							</tr>
+							<tr>
+								<td><label>Compartimos:</label></td>
+								<td><input type="number" min="1" name="se_comparte" value="1"></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td><input type="button" class="button" id="btnVerActividades" value="mis actividades"></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>§</td>
+							</tr>
+							<tr>
+								<td><input type="button" class="button" value="+ agregar" id="btnAgregar"></td>
+								<td></td>
+							</tr>
+						</tbody>
+					</table>
+				</fieldset>
+
+				<div id="cont-agregar-act" style="display:none;">
+					<div id="lista-agregar-act"></div>
+					<p><a id="cerrarCont" href="#Bitacoras">cerrar</a></p>
+				</div>
+
+			</div>
+		</div>
+		
+		<div id="div-lista-actividades" style="display:none;">
+			<p>
+				<label>Buscar:</label>
+				<input type="radio" name="rbActividad" value="nombre" checked>Nombre
+				<input type="radio" name="rbActividad" value="desc">Desc.
+				<input type="text" id="txtBuscar" value="" style="width:60px;">
+			</p>
+			<div id="cont-actividades" ></div>
+		</div>
+	</div>
+
+	<div id="cont-button">
+		<p class="error" style="display:none" id='error'></p>
+		<p class="exito" style="display:none" id='exito'></p>
+	</div>
+
+	<div id="gestion-bitacoras" style="display:none">
+		
+		<div id="cont-bitacoras">
+			<h2>Lista bitácoras</h2>
+			
+			<div id="cont-bits"></div>
+			<div id="cont-detalle-bitacora" style="display:none">
+			</div>
+		</div>
+	</div>
+</script>
+
+<script type="text/template" id="tmp_agregar_cont" >
+	<div id="cont-agregar-act" style="display:none">
+		<div id="lista-agregar-act"></div>
+		<p><a id="cerrarCont" href="#Bitacoras">cerrar</a></p>
+	</div>
+	<script>
+		$('#cerrarCont').click(function(){
+			$('#cont-agregar-act').fadeOut(1000);
+		});
+	</script>
+</script>
+
+<script type="text/x-handlebars-template" id="item-actividad">
+	<div id="cont-item-actividad">
+			<div class="item-act" value={{_id}}>
+				<label>Nombre:</label>{{act_nombre}}  </br>
+				<label>Duración:</label>{{act_duracion}} minutos </br>
+			</div>
+			<input type="button" id={{_id}} class="button item-button" value="+">
+
+	</div>
+</script>
+
+<script type="text/template" id="actividadItemListener">
+	<script>
+		$('.item-button').click(function(){
+			//1-Mostramos contenedor
+			$('#cont-agregar-act').fadeIn(1000);
+
+			//2-Verificamos actividad no este en DIV #cont-agregar-contenedor.
+			var id=$(this).attr('id');
+			var isTrue=true;
+			var divs = $('#lista-agregar-act .item-act');
+
+			if(divs.length>0){
+				$.each(divs, function(i, div){
+					act_id = $(div).attr('value');
+					if(id.trim()==act_id.trim()){
+						isTrue=false;
+					}else{}
+				});
+			}
+
+			//3-Si no, traer actividad y agregar a div.
+			if(isTrue==true){
+				$.post('/actividades/getActividad', {id:id},function(actividad){
+					//4-Renderizar y agregar DIV actividad.
+					tmp=$('#item-actividad-bitacora').html();
+					html = Handlebars.compile(tmp);
+					$('#lista-agregar-act').append(html(actividad));
+
+					//5-Mostrar DIV actividad.
+					$('lista-agregar-act .cont-item-actividad').each(function(){
+						$(this).fadeIn(1000);
+					});
+					$('input[name="hra_inicio"]').change();
+				});
+			}
+		});
+	</script>
+</script>
+
+
+<script type="text/x-handlebars-template" id="item-actividad-bitacora">
+	<div id="cont-item-actividad" class="cont-item-actividad">
+			<div class="item-act" value={{_id}}>
+				<label>Nombre:</label>{{act_nombre}}  </br>
+				<label>Duración:</label>{{act_duracion}} minutos </br>
+			</div>
+			<input type="button" id={{_id}} class="button item-button-extraer" value="-">
+			<input type="hidden" class="hra_final" value={{act_duracion}}>
+	</div>
+
+	<script type="text/javascript">
+		$('.item-button-extraer').click(function(){
+			id=$(this).attr('id');
+
+			var div_cont_item = $('#lista-agregar-act').find('.cont-item-actividad');
+			
+			$(div_cont_item).each(function(){
+				id_div = $(this).find('.item-act').attr('value');
+				if(id.trim()==id_div.trim()){
+					$(this).remove();
+					return;
+				}
+			});
+		});
+	</script>
+
+</script>
+
+
+<script type="text/x-handlebars-template" id="item-bitacora">
+	<div id="cont-item-bitacora" value={{_id}} class="item-bit">
+		<div id="item-bit">
+			<label>Nombre:</label>{{bit_nom_enc}}  </br>
+			<label>Fecha:</label>{{bit_fecha}}</br>
+			<p>
+				<input type="button" id={{_id}} class="button eliminar  btnEliminar"  value="eliminar">
+				<input type="button" id={{_id}} class="button  btnEditar" value="editar">
+			</p>	
+			</div>
+	</div>
+</script>
+
+<script type="text/template" id="item-bitacora-listener">
+	<script type="text/javascript">
+		$('.eliminar').click(function(){
+			id = $(this).attr('id');
+			$.post('/bitacoras/eliminarBitacora',{id:id},function(data){
+				if(!data){
+					//No se elimino.
+				}else{
+					//Se elimino.
+							$('.item-bit').each(function(){
+							if($(this).attr('value').trim()==id.trim()){
+							$(this).remove();
+							$('#cont-detalle-bitacora').fadeOut(200);
+							$('#cont-detalle-bitacora').empty();
+
+							return;
+						}
+					});
+				}
+			});
+
+		});
+
+		$('.btnEditar').click(function(){
+			id = $(this).attr('id');
+			$('#cont-detalle-bitacora').fadeOut(200);
+			$.post('/bitacoras/getBitacora',{id:id},function(bitacora){
+				
+				tmp = $('#tmp-detalle-bitacora').html();
+				html = Handlebars.compile(tmp);
+				$('#cont-detalle-bitacora').fadeIn(2000).html(html(bitacora));
+
+				//GET ARTICULOS
+				$.post('/bitacoras/getActividades',{id:bitacora._id},function(actividades){
+
+					$('#div-editar-actividades').empty();
+					$.each(actividades, function(i, actividad){
+						tmp = $('#item-actividad-bitacora_edit').html();
+						html = Handlebars.compile(tmp);
+						$('#div-editar-actividades').append(html(actividad));
+						$('.cont-item').each(function(){
+							$(this).fadeIn(1000);
+						});
+
+					});
+
+					$('#hra_inicio_edit').click();
+				});
+			});
+		});
+	</script>
+</script>
+
+<script type="text/x-handlebars-template" id="tmp-detalle-bitacora">
+	<div id="cont-bit-detalle">
+	<input type="button" class="button" id="btnAgregarActividad" value="+ actividad">
+	<table>
+					<tbody>
+						<tr>
+							<td><label>Encargado:</label></td>
+							<td><input type="text" name="nombre_edit" value="{{bit_nom_enc}}"></td>
+						</tr>
+						<tr>
+							<td><label>Descripción:</label></td>
+							<td><input type="text" name="desc_edit" value="{{bit_desc}}"></td>
+						</tr>
+						<tr>
+							<td><label>Fecha:</label></td>
+							<td><input type="date" name="fecha_edit" value={{bit_fecha}}></td>
+						</tr>
+						<tr>
+							<td><label>Inicio:</label></td>
+							<td><input type="time" name="hra_inicio_edit"  id="hra_inicio_edit" value={{bit_hora_inicio}}></td>
+						</tr>
+						<tr>
+							<td><label>Final:</label></td>
+							<td><input type="time" name="hra_final_edit" id="hra_final_edit" value={{bit_hora_salida}} disabled></td>
+						</tr>
+						<tr>
+							<td><label>Dirección:</label></td>
+							<td><input type="text" name="dir_edit" value="{{bit_direccion}}"></td>
+						</tr>
+						<tr>
+							<td><label>Participantes:</label></td>
+							<td><input type="number" min="1" name="participantes_edit" value={{bit_cant_participantes}}></td>
+						</tr>
+						<tr>
+							<td><label>Compartimos:</label></td>
+							<td><input type="number" min="1" name="se_comparte_edit" value={{bit_cuantos_comparten}}></td>
+						</tr>
+					</tbody>
+				</table>
+				<div id="div-editar-actividades"></div>
+				<div id="cont-agregar-act_edit" style="display:none;">
+					<div id="lista-agregar-act_edit"></div>
+					<p><a id="cerrarCont_edit" href="#Bitacoras">cerrar</a></p>
+				</div>
+		<div id="cont-button_edit">
+			<input type="button" id="btnGuardar" value="guardar" class="button"></br></br>
+			<p class="error" style="display:none" id='error_edit'></p>
+			<p class="exito" style="display:none" id='exito_edit'></p>
+		</div>
+	</div>
+	<input type="hidden" name="_id" value={{_id}}>
+</script>
+
+<script type="text/x-handlebars-template" id="item-actividad-bitacora_edit">
+	<div id="cont-item-actividad" class="cont-item-actividad">
+			<div class="item-act" value={{act_id}}>
+				<label>Nombre:</label>{{act_nombre}}  </br>
+				<label>Duración:</label>{{act_duracion}} minutos </br>
+			</div>
+			<input class="button item-button-extraer" value="-" type="button" id={{act_id}}  >
+			<input type="hidden" class="hra_final" value={{act_duracion}}>
+	</div>
+
+	<script type="text/javascript">
+		$('.item-button-extraer').click(function(){
+
+			id=$(this).attr('id');
+			bit_id = $('input[name="_id"]').val();
+
+			$('#error_edit').hide();
+			$('#error_edit').hide();
+
+			$.post('/bitacoras/extraerActividad',{bit_id:bit_id, act_id:id},function(data){	
+				if(!data){
+					$('#error_edit').fadeIn(1000).html(' Actividad no pudo ser eliminada.').show();
+					return;
+				}else{
+					$('#exito_edit').fadeIn(1000).html(' Actividad se eliminó.').show();
+				}
+			});
+
+			var div_cont_item = $('#div-editar-actividades').find('.cont-item-actividad');
+			
+			$(div_cont_item).each(function(){
+				id_div = $(this).find('.item-act').attr('value');
+				if(id.trim()==id_div.trim()){
+					$(this).remove();
+					//ACTIVO EVENTO PARA SUMAR HORA FINAL
+					$('#hra_inicio_edit').click();
+					return;
+				}
+			});
+		});
+	</script>
+
+</script>
+
+<script type="text/x-handlebars-template" id="item-actividad_edit">
+	<div id="cont-item-actividad">
+			<div class="item-act" value={{_id}}>
+				<label>Nombre:</label>{{act_nombre}}  </br>
+				<label>Duración:</label>{{act_duracion}} minutos </br>
+			</div>
+			<input type="button" id={{_id}} class="button item-button_edit" value="+">
+			<input type="hidden" class="hra_final" value={{act_duracion}}>
+
+	</div>
+</script>
+
+<script type="text/template" id="actividadItemListener_edit">
+	<script>
+		$('.item-button_edit').click(function(){
+	
+			$('#error_edit').hide();
+			$('#exito_edit').hide();
+			//1-Verificamos actividad no este en DIV #cont-agregar-contenedor.
+			var id=$(this).attr('id');
+			var isTrue=true;
+			var divs = $('#div-editar-actividades .item-act');
+
+			if(divs.length>0){
+				$.each(divs, function(i, div){
+					act_id = $(div).attr('value');
+					if(id.trim()==act_id.trim()){
+						isTrue=false;
+					}else{}
+				});
+			}
+
+			//2-Si no, traer actividad y agregar a div.
+			if(isTrue==true){
+				$.post('/actividades/getActividad', {id:id},function(actividad){
+					
+
+					//3-Agregamos act a bitacora.
+					bit_id = $('input[name="_id"]').val();
+					$.post('/bitacoras/almacenarActividad',{bit_id:bit_id, act_id:id},function(data){
+						if(!data){
+							$('#error_edit').fadeIn().html('No se agregó la actividad.').show()
+							return;
+						}else{
+							$('#exito_edit').fadeIn().html('Se agregó la actividad.').show()
+						}
+					});
+
+					//4-Renderizar y agregar DIV actividad.
+					tmp=$('#item-actividad-bitacora_edit').html();
+					html = Handlebars.compile(tmp);
+					$('#div-editar-actividades').append(html(actividad));
+
+					//5-Mostrar DIV actividad.
+					$('div-editar-actividades .cont-item-actividad').each(function(){
+						$(this).fadeIn(1000);
+					});
+
+					//ACTIVO EVENTO PARA SUMAR HORA FINAL
+					$('#hra_inicio_edit').click();
+				});
+			}else{
+				$('#error_edit').html(' La bítacora ya contiene esta actividad.').fadeIn(2000);
+			}
+		});
+	</script>
+</script>
+
+
+<script type="text/template" id="tmp_extraer_bitacoras">
+	<div id="cont-extraer-bitacora" style="display:none;">
+		<div id="cont_msg">
+			<div class="error" style="display:none" id='error'></div>
+			<div class="exito" style="display:none" id='exito'></div>
+		</div>
+		<div id="cont-buscar">
+			<p id="pbuscar">
+				<label>Buscar:</label>
+				<input type="radio" name="rbbitacora" value="enc" checked id="rbNom">Encargado
+				<input type="radio" name="rbbitacora" value="fecha" id="rbFecha">Fecha
+				<input type="text" id="txtBuscarBit" value="">
+			</p>
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<th></th>
+					<th>Encargado</th>
+					<th>Descripción</th>
+					<th>Fecha</th>
+					<th>Inicio</th>
+					<th>Final</th>
+					<th>Dirección</th>
+					<th>Part.</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="cont_tbl">
+			</tbody>
+		</table>
+	</div>
+	</div>
+
+</script>
+
+
+<script type="text/x-handlebars-template" id="tmp_fila_bitacora">
+	<tr class="Bit_fila" id="Fila_{{_id}}">
+		{{#if bit_extraido}}
+			<td><label>extraído</label></td>
+		{{else}}
+			<td><input type="button" class="button btnExtraer" value="extraer" id='{{_id}}'></td>
+		{{/if}}
+		<td>{{bit_nom_enc}}</td>
+		<td>{{bit_desc}}</td>
+		<td>{{bit_fecha}}</td>
+		<td>{{bit_hora_inicio}}</td>
+		<td>{{bit_hora_salida}}</td>
+		<td>{{bit_direccion}}</td>
+		<td>{{bit_cant_participantes}}</td>
+		<td><input type="button" class="button btnDetalle" value="general" id='det_{{_id}}'></td>
+	</tr>
+</script>
+
+<script type="text/template" id="tmp_fila_bitacora_listener">
+	<script type="text/javascript">
+		$('.btnExtraer').click(function(){
+			id = $(this).attr('id');
+
+			//GET  BITACORA  ---> PARTICIPANTES Y CON CUANTOS SE COMPARTE
+			$.post('/bitacoras/getBitacora',{id:id},function(bitacora){
+
+				var bit_id=id;
+				var part = bitacora.bit_cant_participantes;
+				var comp = bitacora.bit_cuantos_comparten;
+
+				acts = bitacora.actividades;
+
+//-------------->JUNTAMOS ARTICULOS TOTAL.
+				var art_all = [];
+				$.each(acts, function(i, actividad){
+					$.each(actividad.articulos, function(i, articulo){
+						art_all.push(articulo);
+					});
+				});
+//-------------->CREAR NUEVO ARR
+				arr_zip = [];
+				console.log('-------1--------');
+				console.log("array sin comprimir->");
+				console.log(art_all);
+
+				for(i=0; i<art_all.length;i++){
+					art = art_all[i];
+					obj_tmp = art_all[i];
+					contador=0;
+					for(y=0; y<art_all.length;y++){
+						if(art.art_id==art_all[y].art_id){
+							contador++;
+							//art_all.splice(y,1);
+							//console.log('art_all.splice('+y+',1)');
+						}
+					}
+
+					isTrue=true;
+					$.each(arr_zip, function(i, art_zip){
+						if(art_zip.articulo.art_id == obj_tmp.art_id){
+							isTrue=false;
+						}
+					});
+
+					if(isTrue==true){
+						obj_tmp = {
+							articulo:art_all[i],
+							veces:contador
+						};
+						arr_zip.push(obj_tmp);
+					}
+				}
+				console.log('-------2--------');
+				console.log("obtenemos array comprimido->");
+				console.log(arr_zip);
+
+
+				console.log('-------3--------');
+				console.log("verificamos articulos esten en inventario.");
+
+				acierto=0;
+				contador=0;
+				arr_final = [];
+				$.each(arr_zip, function(i, obj){
+					id = obj.articulo.art_id;
+					$.post('/articulos/getArticulo',{id:id},function(articulo){
+						//SE PRESTA!
+						if(articulo.art_prestado){
+							cant = (Math.floor(part/comp))*obj.veces;
+						}else{
+							//NO SE PRESTA
+							cant = part*obj.veces;
+						}
+
+						art={
+							art_id:obj.articulo.art_id,
+							cant:cant
+						};
+						arr_final.push(art);
+
+						console.log('articulo:'+articulo.art_nombre);
+						console.log('cantidad total requerida:'+cant);
+						console.log('cantidad total inventario:'+articulo.art_cant);
+
+
+						if(articulo.art_cant>=cant){
+							acierto++;
+							console.log('acierto 1+');
+						}
+						console.log('aciertos: '+acierto+ ' requeridos:'+ arr_zip.length);
+						contador++;
+
+						if(contador==arr_zip.length){
+							if(acierto==arr_zip.length){
+								console.log('cantidades requeridas, disponibles. :)');
+								contador = 0;
+								console.log(arr_final)
+								$.each(arr_final, function(i, obj){
+									$.post('/articulos/extraerArticulo',{id:obj.art_id,x:obj.cant},function(data){
+										
+										if(data){
+											//EXTRAIDO.
+											console.log('extraido.');
+										}
+										contador++;
+										if(contador==arr_final.length){
+											$.post('/bitacoras/extraerBitacora',{id:bit_id},function(data){
+												if(data){
+													$('#'+bit_id).replaceWith('<label>extraído</label>');
+													$('#exito').html('El proceso fue exitoso.').fadeIn(1000).fadeOut(4000);
+												}else{
+													$('#error').html('Se presentó un error.').fadeIn(1000).fadeOut(4000);
+												}
+											});
+											
+										}
+									});
+								});
+							}else{
+								$('#error').html('Cantidad requerida de articulos, no disponible en inventario.').fadeIn(1000).fadeOut(4000);
+							}
+						}
+
+					});
+				});
+			});
+		});
+
+		$('.btnDetalle').click(function(){
+			id = $(this).attr('id');
+
+			pos = $(this).position();
+			$('#bit_detalle').css({
+				top:pos.top 
+			});
+			
+			id = id.substring(4,id.length);
+			tmp = $('#tmp_detalle_bit').html();
+			html = Handlebars.compile(tmp);
+			$.post('/bitacoras/getBitacora',{id:id},function(bitacora){
+
+				$('#bit_detalle').html(html(bitacora)).fadeIn(1000);
+			});
+		});
+	</script>
+</script>
+
+
+<script type="text/x-handlebars-template" id="tmp_detalle_bit">
+	<div id="cont_det">
+		<p><label>Encargado:</label> &nbsp;{{bit_nom_enc}}</p>
+		<div id="table_det">
+			<table>
+            <tbody>
+				<tr>
+					<td><label>Descripción:</label></td>
+					<td>{{bit_desc}}</td>
+				</tr>
+				<tr>
+					<td><label>Inicio:</label></td>
+					<td>{{bit_hora_inicio}}</td>
+				</tr>
+				<tr>
+					<td><label>Salida:</label></td>
+					<td>{{bit_hora_salida}}</td>
+				</tr>
+				<tr>
+					<td><label>Dirección:</label></td>
+					<td>{{bit_direccion}}</td>
+				</tr>
+				<tr>
+					<td><label>Participantes:</label></td>
+					<td>{{bit_cant_participantes}}</td>
+				</tr>
+				<tr>
+					<td><label>Se comparte:</label></td>
+					<td>{{bit_cuantos_comparten}}</td>
+				</tr>
+				<tr>
+					<td><label>Extraido:</label></td>
+					{{#if bit_extraido}}
+						<td>Sí</td>
+					{{else}}
+						<td>No</td>
+					{{/if}}
+				</tr>
+				<tr>
+					<td><label>Actividades:</label></td>
+					<td>
+					 <div id="det_acts">
+					 	<ul>
+					 		{{#actividades}}
+                            <li>
+                            	<div>
+                            		{{act_nombre}}
+	                            	Articulos:
+	                            	<ul>
+	                            	    {{#articulos}}
+	                            	    <li>
+	                            	    	{{art_nombre}}
+	                            	    </li>	
+	                            		{{/articulos}}
+	                            	</ul>	
+                            	</div>
+                            </li>
+                            {{/actividades}}
+                        </ul>
+					 </div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</div>
+
+		<a href="#" id="btnCerrar_detalle">cerrar</a>
+		<script  type="text/javascript">
+			$('#btnCerrar_detalle').click(function(){
+				$('#bit_detalle').fadeOut(1000);
+			});
+		</script>
+	</div>
+</script>

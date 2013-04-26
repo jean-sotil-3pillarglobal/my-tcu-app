@@ -1,0 +1,725 @@
+<div id="tmp_menu">
+	<ul>
+		<li id="btnPerfil"><a href="#Articulos">Gestionar artículos</a></li>
+		<li id="btnInventario"><a href="#Articulos">Inventario</a></li>
+	</ul>
+	<img src="../img/menu-background.png">
+</div>
+
+<div id="div_cont_articulo" style="display:none">
+</div>
+
+<script type="text/template" id="tmp_gestion_articulo">
+		<div id="cont_gestion_art">
+			<fieldset>
+			<legend>Información artículo</legend>
+			<table>
+				<tbody>
+					<tr>
+						<td><label>Nombre:  </label></td>
+						<td><input name="nombre" type"text" /></td>
+					</tr>
+					<tr>
+						<td><label>Descripción:  </label></td>
+						<td><input name="des" type"text" /></td>
+					</tr>
+					<tr>
+						<td><label>Tiene serie:  </label></td>
+						<td>
+							Sí<input type="radio" name="rbT_serie" id="rbT_serie" value="true" checked>
+							No<input type="radio" name="rbT_serie" value="false">
+						</td>
+					</tr>
+					<tr>
+						<td><label>Se prestar:  </label></td>
+						<td>
+							Sí<input type="radio" name="rbSepresta" id="rbS_presta" value="true" checked>
+							No<input type="radio" name="rbSepresta" value="false">
+						</td>
+					</tr>
+				</tbody>
+			</table>
+	 		</fieldset>
+	 		<input type="button" id="btnAgregar" class="button" value="+ agregar"/>
+
+	 		<div id="cont-msg">
+				<p class="error" style="display:none" id='error'></p>
+				<p class="exito" style="display:none" id='exito'></p>
+			</div>
+
+		</div>
+
+
+		<div id="cont-lista">
+			<h2>Lista articulos</h2>
+			<p id="cont_buscar">
+				<label>Buscar:</label> 
+				<input type="text" id="txtBuscar" value="">
+			</p>
+			<div id="cont-articulos">
+				<div id="lista-articulos" style="display:none;">
+				</div>
+				<div id="detalle-articulo" style="display:none;">
+				</div>
+			</div>
+		</div>
+
+
+</script>
+
+<script type="text/x-handlebars-template" id="item-articulo">
+	<div id="cont-item-articulo">
+			<div class="item-art" value={{_id}}>
+			<label>Nombre:</label>{{art_nombre}}  </br>
+			<label>Se presta:</label>
+			{{#if art_prestado}}
+				Sí
+			{{else}}
+				No
+			{{/if}}
+			<label>Tiene Serie:</label> 
+			{{#if art_serie}}
+				Sí
+			{{else}}
+				No
+			{{/if}}
+			<p>
+				<input type="button" id={{_id}} class="button eliminar  btnEliminar"  value="eliminar">
+				<input type="button" id={{_id}} class="button  btnEditar" value="editar">
+			</p>
+			<script type="text/javascript">
+				$('.btnEliminar').click(function(){
+
+					var id = $(this).attr('id');
+					$.post('/articulos/eliminarArticulo',{id:id},function(data){
+						if(!data){
+						}else{
+							$('.item-art').each(function(){
+								_id= $(this).attr('value');
+								if(id==_id){
+									$(this).remove().show(1000);
+
+									//EXTRA
+									id_detalle = $('#_id').attr('value');
+									
+									if(id_detalle == _id){
+										$('#detalle-articulo').empty();
+									}
+									return;
+								}
+							});
+						}
+					});
+				});
+
+				$('.btnEditar').click(function(){
+
+					var id = $(this).attr('id');
+					$.post('/articulos/getArticulo',{id:id},function(data){
+						if(!data){
+						}else{
+							$('#detalle-articulo').empty();
+							tmp = $('#item-detalle').html();
+							html = Handlebars.compile(tmp);
+							$('#detalle-articulo').html(html(data)).fadeIn(1000);
+						}
+					});
+								
+				});
+			</script>
+		</div>
+	</div>
+</script>
+
+<script type="text/x-handlebars-template" id="item-detalle">
+	<div id="cont-item-detalle">
+			<table>
+				<tbody>
+					<tr>
+						<td><label>Nombre:  </label></td>
+						<td><input type="text" id="nombre_editar" value="{{art_nombre}}"></td>
+					</tr>
+					<tr>
+						<td><label>Descripción:  </label></td>
+						<td><input type="text" id="desc_editar" value="{{art_descripcion}}"></td>
+					</tr>
+					<tr>
+						<td><label>Se presta:</label></td> 
+						{{#if art_prestado}}
+							<td>Sí<input type="radio" name="rbSepresta_editar" value="true" checked>
+								No<input type="radio" name="rbSepresta_editar" value="false"></td>
+						{{else}}
+							<td>Sí<input type="radio" name="rbSepresta_editar" value="true">
+								No<input type="radio" name="rbSepresta_editar" value="false" checked></td>
+						{{/if}}
+					</tr>
+					<tr>
+						<td><label>Tiene serie:</label></td> 
+						{{#if art_serie}}
+							<td>Sí<input type="radio" name="rbT_serie_editar" value="true" checked>
+								No<input type="radio" name="rbT_serie_editar" value="false"></td>
+						{{else}}
+							<td>Sí<input type="radio" name="rbT_serie_editar" value="true">
+							No<input type="radio" name="rbT_serie_editar" value="false" checked></td>
+						{{/if}}
+					</tr>
+					<tr><td></td><td></td></tr>
+					<tr>
+						<td></td><td><input type="button" id="btnGuardar" value="guardar" class="button"/></td>
+					</tr>
+				</tbody>
+			</table>
+			</br>
+			</br>
+	 		<input type="hidden" value={{_id}} id="_id">
+
+	 		<div id="cont-msg">
+				<p class="error" style="display:none" id='error_editar'></p>
+				<p class="exito" style="display:none" id='exito_editar'></p>
+			</div>
+	</div>
+</script>
+
+<script type="text/template" id="tmp_articulos_inventario">
+	<div id="cont-articulos_inventario" style="display:none;">
+		<div id="cont-msg">
+			<div class="error" style="display:none" id='error'></div>
+			<div class="exito" style="display:none" id='exito'></div>
+		</div>
+		<p id="cont_buscar">
+			<label>Buscar:</label>
+			<input type="text" id="txtBuscar" value="">
+		</p>
+		<table>
+			<thead>
+				<tr>
+					<th>Nombre</th>
+					<th>Descripción</th>
+					<th>Cantidad</th>
+					<th>Prestado</th>
+					<th></th>
+					<th></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody id="cont_tbl">
+			</tbody>
+		</table>
+		<div id="white_space">
+			
+		</div>
+	</div>
+</script>
+
+<script type="text/x-handlebars-template" id="fila_articulo">
+	<tr class="Art_fila">
+		<td>{{art_nombre}}</td>
+		<td>{{art_descripcion}}</td>
+		<td>{{art_cant}}</td>
+		{{#if art_cant_prestado}}
+			<td>{{art_cant_prestado}}</td>
+		{{else}}
+			<td>-N/A-</td>
+		{{/if}}
+
+		<td><input type="button" value="inventario" id="{{_id}}" class="btnInventario button"></td>
+
+		{{#if art_serie}}
+			<td><input type="button" value="prestar" id="{{_id}}" class="btnPrestar button"></td>
+			<td><input type="button" value="devolver" id="{{_id}}" class="btnDevolver button"></td>
+		{{else}}
+			<td>-N/A-</td>
+			<td>-N/A-</td>
+		{{/if}}
+	</tr>
+</script>
+
+<script type="text/template" id="fila_articulo_listener">
+	<script type="text/javascript">
+		
+		$('.btnInventario').click(function(){
+			$('#cont_inventario').fadeOut(200);
+			$('#cont_inventario_no_serie').fadeOut(200);
+			$('#cont_prestar_devolver').fadeOut(200);
+
+			id=$(this).attr('id');
+
+			pos = $('#'+id).position();
+			$('#cont_inventario').css({
+				top:pos.top + 190
+			});
+			$('#cont_inventario_no_serie').css({
+				top:pos.top + 190
+			});
+			$.post('/articulos/getArticulo',{id:id},function(articulo){
+				if(articulo){
+					if(articulo.art_serie==true){
+						tmp = $('#tmp_cont_inventario_serie').html();
+
+						$.post('/articulos/getart_series_all',{id:articulo._id},function(series){
+							if(!series){
+								console.log('No se encontraron series.');
+							}else{
+								tmp = $('#tmp_opcion_serie').html();
+								html = Handlebars.compile(tmp);
+								_.each(series,function(serie){
+									$('#slcArt_id').append(html(serie));
+								});
+							}
+						});
+						tmp = Handlebars.compile(tmp);
+						$('#cont_inventario').html(tmp(articulo)).fadeIn(1000);
+
+					}else{
+						tmp = $('#tmp_cont_inventario_sin_serie').html();
+						tmp = Handlebars.compile(tmp);
+						$('#cont_inventario_no_serie').html(tmp(articulo)).fadeIn(1000);
+					}
+				}
+			});
+		});
+		$('.btnPrestar').click(function(){
+			$('#cont_inventario').fadeOut(200);
+			$('#cont_inventario_no_serie').fadeOut(200);
+			$('#cont_prestar_devolver').fadeOut(200);
+
+			id=$(this).attr('id');
+			pos = $('#'+id).position();
+			$('#cont_prestar_devolver').css({
+				top:pos.top + 190
+			});
+
+			$.post('/articulos/getArticulo',{id:id},function(articulo){
+				if(articulo){
+
+					tmp=$('#tmp_cont_prestar').html();
+					html = Handlebars.compile(tmp);
+					$('#cont_prestar_devolver').html(html(articulo)).fadeIn(1000);
+
+					$.post('/articulos/getart_series',{id:id},function(series){
+						tmp = $('#tmp_opcion_serie').html();
+						html = Handlebars.compile(tmp);
+						_.each(series,function(serie){
+							$('#slcArt_id_prestar').append(html(serie));
+						});
+					});
+				}
+			});
+		});
+
+		$('.btnDevolver').click(function(){
+			$('#cont_inventario').fadeOut(200);
+			$('#cont_inventario_no_serie').fadeOut(200);
+			$('#cont_prestar_devolver').fadeOut(200);
+
+			id=$(this).attr('id');
+			id=$(this).attr('id');
+			pos = $('#'+id).position();
+			$('#cont_prestar_devolver').css({
+				top:pos.top + 190
+			});
+
+			$.post('/articulos/getArticulo',{id:id},function(articulo){
+				if(articulo){
+
+					tmp=$('#tmp_cont_devolver').html();
+					html = Handlebars.compile(tmp);
+					$('#cont_prestar_devolver').html(html(articulo)).fadeIn(1000);
+
+					$.post('/articulos/getart_series_prestado',{id:id},function(series){
+						tmp = $('#tmp_opcion_serie').html();
+						html = Handlebars.compile(tmp);
+						_.each(series,function(serie){
+							$('#slcArt_id_devolver').append(html(serie));
+						});
+					});
+				}
+			});
+		});
+
+
+	</script>	
+</script>
+
+<script type="text/x-handlebars-template" id="tmp_cont_inventario_sin_serie">
+	<input type="hidden" id="inv_art_id_sin_serie" value={{_id}} >
+	<p><label>Nombre:</label>{{art_nombre}}</p>
+	<div>
+		<input type="button" class="button"  id="btnInsertar" value="insertar">
+		<input type="number" id="art_cant" value=1 min=1>
+		<input type="button" class="button"  id="btnExtraer" value="extraer">
+		<input type="number" id="art_cant_extraer" value=1 min=1>
+	</div>
+	<a id="btnCerrar" href="#">cerrar</a>
+	<script type="text/javascript">
+
+		$('#btnCerrar').click(function(){
+			$('#cont_inventario').fadeOut(1000);
+			$('#cont_inventario_no_serie').fadeOut(1000);
+			$('#cont_prestar_devolver').fadeOut(1000);
+
+			$.post('/articulos/getAllArticulos',{},function(articulos){
+				if(!articulos){
+
+				}else{
+					$('#cont_tbl').empty();
+					tmp = $('#fila_articulo').html();
+					html = Handlebars.compile(tmp);
+					$.each(articulos,function(i, articulo){
+						$('#cont_tbl').append(html(articulo));
+					});
+					tmp=_.template($('#fila_articulo_listener').html());
+					$('#div_cont_articulo').append(tmp);
+				}
+			});
+		});
+
+		$('#btnInsertar').click(function(){
+			id = $('#inv_art_id_sin_serie').attr('value');
+			x = $('#art_cant').val();
+
+			$.post('/articulos/almacenarArticulo',{id:id,x:x},function(data){
+				console.log('valor:'+data.isTrue);
+				if(!data.isTrue){
+					$('#error').html(data.msg).fadeIn(1000).fadeOut(3000);
+				}else{
+					$('#exito').html(data.msg).fadeIn(1000).fadeOut(3000);
+					$.post('/articulos/getAllArticulos',{},function(articulos){
+						if(!articulos){
+
+						}else{
+							$('#cont_tbl').empty();
+							tmp = $('#fila_articulo').html();
+							html = Handlebars.compile(tmp);
+							$.each(articulos,function(i, articulo){
+								$('#cont_tbl').append(html(articulo));
+							});
+							tmp=_.template($('#fila_articulo_listener').html());
+							$('#div_cont_articulo').append(tmp);
+						}
+					});
+				}
+			});
+		});
+
+		$('#btnExtraer').click(function(){
+			id = $('#inv_art_id_sin_serie').attr('value');
+			x = $('#art_cant_extraer').val();
+
+			$.post('/articulos/extraerArticulo',{id:id,x:x},function(data){
+				if(!data.isTrue){
+					$('#error').html(data.msg).fadeIn(1000).fadeOut(3000);
+				}else{
+					$('#exito').html(data.msg).fadeIn(1000).fadeOut(3000);
+					$.post('/articulos/getAllArticulos',{},function(articulos){
+						if(!articulos){
+
+						}else{
+							$('#cont_tbl').empty();
+							tmp = $('#fila_articulo').html();
+							html = Handlebars.compile(tmp);
+							$.each(articulos,function(i, articulo){
+								$('#cont_tbl').append(html(articulo));
+							});
+							tmp=_.template($('#fila_articulo_listener').html());
+							$('#div_cont_articulo').append(tmp);
+						}
+					});
+				}
+			});
+		});
+
+
+	</script>
+</script>
+
+<script type="text/x-handlebars-template" id="tmp_cont_inventario_serie">
+	<input type="hidden" id="inv_art_id" value={{_id}} >
+	<p><label>Nombre:</label>{{art_nombre}}</p>
+	<div>
+		<input type="number" id="art_cant_serie" value=0 min=1>
+		<div id="cont_series">
+
+		</div>
+		<input type="button" class="button"  id="btnInsertar_series" value="insertar">
+		<select id="slcArt_id" >
+		<input type="button" class="button"  id="btnExtraer_serie" value="extraer">
+			<option value=null>seleccionar</option>
+		</select>
+	</div>
+	<a id="btnCerrar" href="#">cerrar</a>
+
+	<script type="text/javascript">
+		$('#art_cant_serie').change(function(){
+			
+			cant = $(this).val();
+			tmp = _.template($('#tmp_serie').html());
+			$('#cont_series').empty();
+			for(var i=1; i<=cant; i++){
+				$('#cont_series').append(tmp);
+			}
+			
+			$('.txt_serie').mask("999-9999-999-999");
+
+		});
+
+
+		$('#btnInsertar_series').click(function(){
+			txt_inputs = $('.txt_serie');
+			id = $('#inv_art_id').attr('value');
+			x = [];
+
+			$(txt_inputs).each(function(){
+				x.push($(this).val());
+			});
+
+			$.post('/articulos/almacenarArticulo',{id:id,x:x},function(data){
+				if(!data.isTrue){
+					$('#error').html(data.msg).fadeIn(1000).fadeOut(3000);
+				}else{
+					$('#exito').html(data.msg).fadeIn(1000).fadeOut(3000);
+
+					//REFRESCAR
+					$.post('/articulos/getAllArticulos',{},function(articulos){
+						if(!articulos){
+
+						}else{
+							$('#cont_tbl').empty();
+							tmp = $('#fila_articulo').html();
+							html = Handlebars.compile(tmp);
+							$.each(articulos,function(i, articulo){
+								$('#cont_tbl').append(html(articulo));
+							});
+							tmp=_.template($('#fila_articulo_listener').html());
+							$('#div_cont_articulo').append(tmp);
+						}
+					});
+					$('#cont_series').empty();
+					$.post('/articulos/getart_series_all',{id:id},function(series){
+						$('#slcArt_id').empty();
+						tmp = $('#tmp_opcion_serie').html();
+						html = Handlebars.compile(tmp);
+						_.each(series,function(serie){
+							$('#slcArt_id').append(html(serie));
+						});
+					});
+				}
+			});
+		});
+		
+
+		$('#btnExtraer_serie').click(function(){
+			id = $('#inv_art_id').attr('value');
+			x = $('#slcArt_id').val();
+
+			$.post('/articulos/extraerArticulo',{id:id,x:x},function(data){
+				if(!data.isTrue){
+					$('#error').html(data.msg).fadeIn(1000).fadeOut(3000);
+				}else{
+					$('#exito').html(data.msg).fadeIn(1000).fadeOut(3000);
+					$.post('/articulos/getAllArticulos',{},function(articulos){
+						if(!articulos){
+
+						}else{
+							$('#cont_tbl').empty();
+							tmp = $('#fila_articulo').html();
+							html = Handlebars.compile(tmp);
+							$.each(articulos,function(i, articulo){
+								$('#cont_tbl').append(html(articulo));
+							});
+							tmp=_.template($('#fila_articulo_listener').html());
+							$('#div_cont_articulo').append(tmp);
+						}
+					});
+
+					$.post('/articulos/getart_series_all',{id:id},function(series){
+						$('#slcArt_id').empty();
+						tmp = $('#tmp_opcion_serie').html();
+						html = Handlebars.compile(tmp);
+						_.each(series,function(serie){
+							$('#slcArt_id').append(html(serie));
+						});
+					});
+				}
+			});
+		});
+	
+		$('#btnCerrar').click(function(){
+			$('#cont_inventario').fadeOut(1000);
+			$('#cont_inventario_no_serie').fadeOut(1000);
+			$('#cont_prestar_devolver').fadeOut(1000);
+
+			$.post('/articulos/getAllArticulos',{},function(articulos){
+				if(!articulos){
+
+				}else{
+					$('#cont_tbl').empty();
+					tmp = $('#fila_articulo').html();
+					html = Handlebars.compile(tmp);
+					$.each(articulos,function(i, articulo){
+						$('#cont_tbl').append(html(articulo));
+					});
+					tmp=_.template($('#fila_articulo_listener').html());
+					$('#div_cont_articulo').append(tmp);
+				}
+			});
+		});
+	</script>
+</script>
+
+<script type="text/x-handlebars-template" id="tmp_opcion_serie">
+	<option value={{art_num_serie}}>{{art_num_serie}}</option>
+</script>
+
+<script type="text/template" id="tmp_serie">
+	<input type="text" value="" class="txt_serie">
+</script>
+
+
+<script type="text/x-handlebars-template" id="tmp_cont_prestar">
+	<input type="hidden" id="inv_art_id_prestar" value={{_id}} >
+	<p><label>Nombre:</label>{{art_nombre}}</p>
+	<div>
+		<select id="slcArt_id_prestar" >
+			<option value=null>seleccionar</option>
+		</select>
+		<input type="button" class="button" id="btnPrestar" value="prestar">
+	</div>
+	
+	<a id="btnCerrar" href="#">cerrar</a>
+	<script type="text/javascript">
+
+		$('#btnCerrar').click(function(){
+			$('#cont_inventario').fadeOut(1000);
+			$('#cont_inventario_no_serie').fadeOut(1000);
+			$('#cont_prestar_devolver').fadeOut(1000);
+
+			$.post('/articulos/getAllArticulos',{},function(articulos){
+				if(!articulos){
+
+				}else{
+					$('#cont_tbl').empty();
+					tmp = $('#fila_articulo').html();
+					html = Handlebars.compile(tmp);
+					$.each(articulos,function(i, articulo){
+						$('#cont_tbl').append(html(articulo));
+					});
+					tmp=_.template($('#fila_articulo_listener').html());
+					$('#div_cont_articulo').append(tmp);
+				}
+			});
+		});
+
+		$('#btnPrestar').click(function(){
+			id = $('#inv_art_id_prestar').attr('value');
+			serie = $('#slcArt_id_prestar').val();
+
+			$.post('/articulos/prestar_articulo',{id:id,serie:serie},function(data){
+				if(!data.isTrue){
+					$('#error').html(data.msg).fadeIn(1000).fadeOut(3000);
+				}else{
+					$('#exito').html(data.msg).fadeIn(1000).fadeOut(3000);
+					$.post('/articulos/getAllArticulos',{},function(articulos){
+						if(!articulos){
+
+						}else{
+							$('#cont_tbl').empty();
+							tmp = $('#fila_articulo').html();
+							html = Handlebars.compile(tmp);
+							$.each(articulos,function(i, articulo){
+								$('#cont_tbl').append(html(articulo));
+							});
+							tmp=_.template($('#fila_articulo_listener').html());
+							$('#div_cont_articulo').append(tmp);
+
+							$.post('/articulos/getart_series',{id:id},function(series){
+								$('#slcArt_id_prestar').empty();
+								tmp = $('#tmp_opcion_serie').html();
+								html = Handlebars.compile(tmp);
+								_.each(series,function(serie){
+									$('#slcArt_id_prestar').append(html(serie));
+								});
+							});
+						}
+					});
+				}
+			});
+		});
+
+	</script>
+</script>
+
+
+<script type="text/x-handlebars-template" id="tmp_cont_devolver">
+	<input type="hidden" id="inv_art_id_devolver" value={{_id}} >
+	<p><label>Nombre:</label>{{art_nombre}}</p>
+	<div>
+		<select id="slcArt_id_devolver" >
+			<option value=null>seleccionar</option>
+		</select>
+		<input type="button" class="button" id="btnDevolver" value="devolver">
+	</div>
+
+	<a id="btnCerrar" href="#">cerrar</a>
+		<script type="text/javascript">
+
+		$('#btnCerrar').click(function(){
+			$('#cont_inventario').fadeOut(1000);
+			$('#cont_inventario_no_serie').fadeOut(1000);
+			$('#cont_prestar_devolver').fadeOut(1000);
+
+			$.post('/articulos/getAllArticulos',{},function(articulos){
+				if(!articulos){
+
+				}else{
+					$('#cont_tbl').empty();
+					tmp = $('#fila_articulo').html();
+					html = Handlebars.compile(tmp);
+					$.each(articulos,function(i, articulo){
+						$('#cont_tbl').append(html(articulo));
+					});
+					tmp=_.template($('#fila_articulo_listener').html());
+					$('#div_cont_articulo').append(tmp);
+				}
+			});
+		});
+
+
+		$('#btnDevolver').click(function(){
+			id = $('#inv_art_id_devolver').attr('value');
+			serie = $('#slcArt_id_devolver').val();
+
+			$.post('/articulos/devolver_articulo',{id:id,serie:serie},function(data){
+				if(!data.isTrue){
+					$('#error').html(data.msg).fadeIn(1000).fadeOut(3000);
+				}else{
+					$('#exito').html(data.msg).fadeIn(1000).fadeOut(3000);
+					$.post('/articulos/getAllArticulos',{},function(articulos){
+						if(!articulos){
+
+						}else{
+							$('#cont_tbl').empty();
+							tmp = $('#fila_articulo').html();
+							html = Handlebars.compile(tmp);
+							$.each(articulos,function(i, articulo){
+								$('#cont_tbl').append(html(articulo));
+							});
+							tmp=_.template($('#fila_articulo_listener').html());
+							$('#div_cont_articulo').append(tmp);
+
+							$.post('/articulos/getart_series_prestado',{id:id},function(series){
+								$('#slcArt_id_devolver').empty();
+								tmp = $('#tmp_opcion_serie').html();
+								html = Handlebars.compile(tmp);
+								_.each(series,function(serie){
+									$('#slcArt_id_devolver').append(html(serie));
+								});
+							});
+						}
+					});
+				}
+			});
+		});
+
+	</script>
+</script>

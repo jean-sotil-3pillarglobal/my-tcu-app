@@ -1,0 +1,9 @@
+extends layout
+
+block content
+	form(action="/resetearClave", method="post")
+		input(type="hidden", name="_id", value="#{locals.cuenta}")
+		p
+			input#password(type='password', name='pass')
+		p
+			input(type="submit", value="Cambiar clave")

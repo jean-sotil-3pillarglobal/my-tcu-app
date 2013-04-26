@@ -1,0 +1,48 @@
+<div id="tmp_menu">
+	<ul>
+		<li id="btnHistorial"><a href="#Historial">Historial</a></li>
+	</ul>
+	<img src="../img/menu-background.png">
+</div>
+
+<div id="div_cont_historial"></div>
+
+<script type="text/template" id="tmp_gestion_historial">
+	
+	<div id="cont-mensaje">
+		<p class="error" style="display:none" id='error'></p>
+		<p class="exito" style="display:none" id='exito'></p>
+	</div>
+	<div id="cont-button">
+		<p id="pbuscar">
+			<label>Buscar por:</label>
+			<input type="radio" name="rbhistorial" value="nom" checked id="nom">Encargado
+			<input type="radio" name="rbhistorial" value="fec" id="fec">Fecha
+			<input type="radio" name="rbhistorial" value="desc" id="desc">Descripción
+			<input type="text" id="txtBuscar" value="" >
+		</p>
+	</div>
+	<table>
+		<thead>
+			<tr>
+				<th>Encargado</th>
+				<th>Fecha</th>
+				<th>Hora</th>
+				<th>Descripción</th>
+			</tr>
+		</thead>
+		<tbody id="cont_tbl">
+		</tbody>
+	</table>
+
+</script>
+
+
+<script type="text/x-handlebars-template" id="tmp_fila_log">
+	<tr class="Log_fila">
+		<td class="col_encargado">{{nombre}}</td>
+		<td>{{fecha}}</td>
+		<td>{{hora}}</td>
+		<td class="col_mensaje">{{mensaje}}</td>
+	</tr>
+</script>

@@ -1,0 +1,362 @@
+<div id="tmp_menu">
+	<ul>
+		<li id="btnPerfil"><a href="#Actividades">Gestionar actividades</a></li>
+	</ul>
+	<img src="../img/menu-background.png">
+</div>
+
+<div id="div_cont_actividades" style="display:none">
+</div>
+
+<script type="text/template" id="tmp_actividades">
+	<div id="cont-crear-actividad">
+		
+		<div id="div-info-actividad">
+			<div id="info-actividad">
+				<fieldset>
+					<legend>Información actividad</legend>
+					<table>
+						<tbody>
+							<tr>
+								<td><label>Nombre:</label></td>
+								<td><input type="text" name="nombre"></td>
+							</tr>
+							<tr>
+								<td><label>Descripción:</label></td>
+								<td><input type="text" name="desc"></td>
+							</tr>
+							<tr>
+								<td><label>Duración:</label></td>
+								<td><input type="text" name="dur" placeholder="minutos"></td>
+							</tr>
+						</tbody>
+					</table>
+				</fieldset>
+			</div>
+			<div id="div-agregar-articulos" style="display:none"></div>
+		</div>
+		
+		<div id="div-lista-articulos">
+			<p>
+				<label>Buscar:</label>
+				<input type="text" id="txtBuscar" value="">
+			</p>
+			<div id="cont-articulos"></div>
+		</div>
+	</div>
+
+	<div id="cont-button">
+		<input type="button" class="button" value="+ agregar" id="btnAgregar"></br></br>
+		<div class="error" style="display:none" id='error'></div>
+		<div class="exito" style="display:none" id='exito'></div>
+	</div>
+
+	<div id="gestion-actividades" style="display:none">
+		
+		<div id="cont-actividades">
+			<h2>Lista actividades</h2>
+			<p id="pbuscar">
+				<label>Buscar:</label>
+				<input type="radio" name="rbActividad" value="nombre" checked>Nombre
+				<input type="radio" name="rbActividad" value="desc">Desc.
+				<input type="text" id="txtBuscarAct" value="">
+			</p>
+			<div id="cont-act"></div>
+			<div id="cont-detalle-actividad" style="display:none"></div>
+		</div>
+	</div>
+</script>
+
+<script type="text/x-handlebars-template" id="tmp-item-actividad">
+	<div id="cont-item-actividad" value={{_id}} class="item-act">
+		<div id="item-act">
+			<label>Nombre:</label>{{act_nombre}}  </br>
+			<label>Duración:</label>{{act_duracion}} minutos</br>
+			<p>
+				<input type="button" id={{_id}} class="button eliminar  btnEliminar"  value="eliminar">
+				<input type="button" id={{_id}} class="button  btnEditar" value="editar">
+			</p>	
+			</div>
+
+	</div>
+	<script type="text/javascript">
+			$('.eliminar').click(function(){
+				id = $(this).attr('id');
+				$.post('/actividades/eliminarActividad',{id:id},function(data){
+					if(!data){
+						//No se elimino.
+					}else{
+						//Se elimino.
+								$('.item-act').each(function(){
+								if($(this).attr('value').trim()==id.trim()){
+								$(this).remove();
+								return;
+							}
+						});
+					}
+				});
+
+			});
+
+			$('.btnEditar').click(function(){
+				id = $(this).attr('id');
+				$.post('/actividades/getActividad',{id:id},function(actividad){
+					tmp = $('#tmp-detalle-actividad').html();
+					html = Handlebars.compile(tmp);
+					$('#cont-detalle-actividad').fadeIn(2000).html(html(actividad));
+
+					//GET ARTICULOS
+					$.post('/actividades/getArticulos',{id:actividad._id},function(articulos){
+						
+						$('#div-editar-articulos').empty();
+						$.each(articulos, function(i, articulo){
+							tmp = $('#item-articulo-actividad-editar').html();
+							html = Handlebars.compile(tmp);
+							$('#div-editar-articulos').append(html(articulo));
+							$('.cont-item').each(function(){
+								$(this).fadeIn(1000);
+							});
+
+						});
+					});
+				});
+
+
+				
+			});
+	</script>
+</script>
+
+
+<script type="text/x-handlebars-template" id="tmp-detalle-actividad">
+		<div id="cont-act-detalle">
+		<input type="button" class="button" id="btnAgregarArticulo" value="+ articulo">
+		<table>
+			<tbody>
+				<tr>
+					<td><label>Nombre:</label></td>
+					<td><input type="text" name="nom_edit" value="{{act_nombre}}"></td>
+				</tr>
+				<tr>
+					<td><label>Descripción:</label></td>
+					<td><input type="text" name="desc_edit" value="{{act_desc}}"></td>
+				</tr>
+				<tr>
+					<td><label>Duración:</label></td>
+					<td><input type="text" name="dur_edit" value="{{act_duracion}}"></td>
+				</tr>
+			</tbody>
+		</table>
+		<div id="div-editar-articulos" ></div>
+			<div id="cont-button_edit">
+				<input type="button" id="btnGuardar" value="guardar" class="button"></br></br>
+				<div class="error" style="display:none" id='error_edit'></div>
+				<div class="exito" style="display:none" id='exito_edit'></div>
+			</div>
+		</div>
+		<input type="hidden" name="_id" value={{_id}}>
+
+		<div id="cont-agregar-art-edit" style="display:none">
+			<div id="lista-agregar-art-edit">
+
+			</div>
+			<p><a id="cerrarCont" href="#Actividades">cerrar</a></p>
+		</div>
+</script>
+
+<script type="text/x-handlebars-template" id="item-articulo">
+	<div id="cont-item-articulo">
+			<div class="item-art" value={{_id}}>
+				<label>Nombre:</label>{{art_nombre}}  </br>
+				<label>Se presta:</label>
+				{{#if art_prestado}}
+					Sí
+				{{else}}
+					No
+				{{/if}}
+			</div>
+			<input type="button" id={{_id}} class="button item-button" value="+">
+	</div>
+			<script type="text/javascript">
+					$('.item-button').click(function(){
+						
+						var id=$(this).attr('id');
+						$.post('/articulos/getArticulo',{id:id},function(articulo){
+							if(!articulo){
+
+							}else{
+
+								var isTrue=true;
+								var _id = articulo._id;
+								var tam = $('#div-agregar-articulos').find('.cont-item').length;
+								console.log(tam);
+								if(tam>0){
+										var cont_div = $('#div-agregar-articulos #cont-item-articulo');
+										$(cont_div).each(function(){
+											id = $(this).find('.item-art-actividad').attr('value');
+											if(_id.trim() == id.trim()){
+												isTrue=false;
+											}else{
+												return;
+											}
+										});
+								}
+
+								if(isTrue==true){
+									tmp = $('#item-articulo-actividad').html();
+									html = Handlebars.compile(tmp);
+
+									$('#div-agregar-articulos').fadeIn(1000);
+									$('#div-agregar-articulos').append(html(articulo));
+									$('.cont-item').each(function(){
+										$(this).fadeIn(1000);
+									});
+								}
+								return;
+							}
+						});
+					});
+			</script>
+</script>
+
+<script type="text/x-handlebars-template" id="item-articulo-actividad">
+	<div id="cont-item" class="cont-item" value={{_id}}>
+		<div id="cont-item-articulo">
+			<div class="item-art-actividad" value={{_id}}>
+				<label>Nombre:</label>{{art_nombre}}  </br>
+				<label>Se presta:</label>
+				{{#if art_prestado}}
+					Sí
+				{{else}}
+					No
+				{{/if}}
+			</div>
+			<input type="button" id={{_id}} class="button item-button-extraer" value="-">
+		</div>
+	</div>
+			<script type="text/javascript">
+					$('.item-button-extraer').click(function(){
+						id=$(this).attr('id');
+
+						var div_cont_item = $('#div-agregar-articulos').find('.cont-item');
+						
+						$(div_cont_item).each(function(){
+							id_div = $(this).attr('value');
+							if(id.trim()==id_div.trim()){
+								$(this).remove();
+								return;
+							}
+						});
+					});
+			</script>
+</script>
+<script type="text/x-handlebars-template" id="item-articulo-actividad-editar">
+	<div id="cont-item" class="cont-item" value={{_id}} style="display:none;">
+		<div id="cont-item-articulo">
+			<div class="item-art-actividad" value={{_id}}>
+				<label>Nombre:</label>{{art_nombre}}}</br>
+				<label>Se presta:</label>
+				{{#if art_prestado}}
+					Sí
+				{{else}}
+					No
+				{{/if}}
+			</div>
+			<input type="button" id={{_id}} class="button item-button-extraer" value="-">
+			<input id="art_id" type="hidden" value={{art_id}}>
+		</div>
+
+		<script type="text/javascript">
+					$('.item-button-extraer').click(function(){
+						
+						id_art=$(this).attr('id');
+						id_act = $('input[name="_id"]').val();
+
+						isTrue=false;
+						$('#exito_edit').hide();
+						$('#error_edit').hide();
+
+						//1-Eliminar articulo de la actividad.
+						$.post('/actividades/eliminarArticulo',{
+							id_act:id_act,
+							id_art:id_art
+						},function(data){
+							$('#exito_edit').fadeIn(1000).html("Se extrajo el artículo.").fadeOut(4000);
+
+							var div_cont_item = $('#div-editar-articulos').find('.cont-item');
+							
+							$(div_cont_item).each(function(){
+								id_div = $(this).attr('value');
+								if(id_art.trim()==id_div.trim()){
+									$(this).remove().fadeIn(2000);
+									return;
+								}
+							});
+						});
+					});
+			</script>
+	</div>
+
+</script>
+
+
+<script type="text/x-handlebars-template" id="item-articulo-edit">
+	<div id="cont-item-articulo">
+			<div class="item-art" value={{_id}}>
+				<label>Nombre:</label>{{art_nombre}}  </br>
+				<label>Se presta:</label>
+				{{#if art_prestado}}
+					Sí
+				{{else}}
+					No
+				{{/if}}
+			</div>
+			<input type="button" id={{_id}} class="button item-button-edit" value="+">
+	</div>	
+</script>
+
+<script type="text/template" id="listenerAgregar">
+	<script type="text/javascript">
+			/*
+				LISTENER para .item-button-edit
+			*/
+			$('.item-button-edit').click(function(){
+				
+				var id=$(this).attr('id');
+				$('#exito_edit').hide();
+				$('#error_edit').hide();
+				//Revisamos que no este en art de la act
+				$.post('actividades/getArticulos',{id:$('input[name="_id"]').val()},function(articulos){
+					isTrue=true;
+					$.each(articulos, function(i, articulo){
+						if(id.trim()==articulo.art_id.trim()){
+							isTrue=false;
+							return;
+						}
+					});
+
+					if(isTrue==true){
+
+						id_act = $('input[name="_id"]').val();
+						$.post('actividades/almacenarArticulo',{id_actividad:id_act, id_articulo:id},function(data){
+							if(data){
+								$('#exito_edit').html('Se agrego articulo.').fadeIn(2000).fadeOut(4000);
+							}
+						});
+
+						tmp = $('#item-articulo-actividad-editar').html();
+						html = Handlebars.compile(tmp);
+						$.post('/articulos/getArticulo',{id:id},function(articulo){
+								$('#div-editar-articulos').append(html(articulo));
+								$('.cont-item').each(function(){
+								$(this).show();
+							});
+						});
+
+					}else{
+						$('#error_edit').html(' La actividad ya contiene este artículo.').fadeIn(2000).fadeOut(4000);
+					}
+				});
+			});
+	</script>
+</script>

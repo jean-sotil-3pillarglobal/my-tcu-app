@@ -1,0 +1,161 @@
+
+<div id="tmp_menu">
+	<ul>
+		<li id="btnPerfil"><a href="#index">Datos personales</a></li>
+		<li id="btnLista"><a href="#index">Lista usuarios</a></li>
+		<li id="btnNuevo"><a href="#index">Agregar usuario</a></li>
+	</ul>
+	<img src="../img/menu-background.png">
+</div>
+
+<div id="div_perfil" style="display:none">
+</div>
+
+<script type="text/template" id="tmp_ver_perfil">
+		<div>
+			<fieldset>
+			<legend>Datos personales</legend>
+			<label>Nombre:  </label><%= nombre %> &nbsp; <label>Apellidos:  </label> <%= apellido.primero %> <%= apellido.segundo %></br>
+			<label>Email:  </label><%= mail %></br>
+ 			<label>Dirección:  </label><%= direccion %></br>
+ 			<label>Télefono:  </label><%= telefono %></br>
+	 		<input type="button" id="btnEditar" class="button" value="Editar"/>
+	 		</fieldset>
+
+	 		</br>
+	 		</br>
+			<div class="error" style="display:none" id='error'></div>
+			<div class="exito" style="display:none" id='exito'></div>
+		</div>
+</script>
+
+
+<script type="text/template" id="tmp_editar_perfil">
+		<div>
+			<fieldset>
+			<legend>Editar Datos Personales</legend>
+			<table>
+				<tbody>
+					<tr>
+						<td><label>Nombre:  </label></td>
+						<td><input name="nombre" value="<%= nombre %>" type"text" /></td>
+					</tr>
+					<tr>
+						<td><label>Primer Apellido:  </label></td>
+						<td><input name="ape_1" value="<%= apellido.primero %>" type"text" /></td>
+					</tr>
+					<tr>
+						<td><label>Segundo Apellido:  </label></td>
+						<td><input name="ape_2" value="<%= apellido.segundo %>" type"text" /></td>
+					</tr>
+					<tr>
+						<td><label>Email:  </label></td>
+						<td><input name="mail" value="<%= mail %>" type"text" /></td>
+					</tr>
+					<tr>
+						<td><label>Télefono:  </label></td>
+						<td><input name="telefono" value="<%= telefono %>" type"text" /></td>
+					</tr>
+					<tr>
+						<td><label>Dirección:  </label></td>
+						<td><input name="direccion" value="<%= direccion %>" type"text" /></td>
+					</tr>
+					<tr>
+						<td><input type="button" id="btnGuardar" class="button" value="Guardar"/></td>
+						<td><input type="button" id="btnCancelar" class="button" value="Cancelar"/></td>
+					</tr>
+				</tbody>
+			</table>
+	 		</fieldset>
+			<div class="error" style="display:none" id='error'></div>
+			<div class="exito" style="display:none" id='exito'></div>
+	 		
+			
+		</div>
+</script>
+
+<script type="text/template" id="tmp_agregar">
+	<fieldset>
+	<legend>Información Funcional</legend>
+	<table>
+		<tbody>
+			<tr>
+				<td><label>Nombre: </label></td>
+				<td><input type="text" name="nombre"></td>
+			</tr>
+			<tr>
+				<td><label>Primer Apellido: </label></td>
+				<td><input type="text" name="ape_1"></td>
+			</tr>
+			<tr>
+				<td><label>Segundo Apellido: </label></td>
+				<td><input type="text" name="ape_2"></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td><label>Ingrese clave: </label></td>
+				<td><input type="password" name="pass1"></td>
+			</tr>
+			<tr>
+				<td><label>Verificar clave: </label></td>
+				<td><input type="password" name="pass2"></td>
+			</tr>
+			<tr>
+				<td><label>Télefono: </label></td>
+				<td><input type="text" name="telefono"></td>
+			</tr>
+			<tr>
+				<td><label>Email: </label></td>
+				<td><input type="text" name="mail"></td>
+			</tr>
+			<tr>
+				<td><label>Dirección: </label></td>
+				<td><textarea name="direccion" cols=16 rows=3></textarea></td>
+			</tr>
+			<tr>
+				<td>
+					<input id="btnAgregar" class="button" value="+ Agregar" type="button"></td>
+				<td>
+					<input id="btnCancelar" class="button" value="Cancelar" type="button"></td>
+			</tr>
+
+		</tbody>
+	</table>
+	</fieldset>
+
+	<div class="error" style="display:none" id='error'></div>
+	<div class="exito" style="display:none" id='exito'></div>
+</script>
+
+<script id="tmp_cont_lista" type="text/template">
+	<div id="cont-lista">
+		<h2>Lista Usuarios</h2>
+		<div id="divbuscar">	
+			<p>
+				<label>buscar:</label> 
+				<input type="radio" name="rbBuscar" id="rbEmail" value="email" checked> Email
+				<input type="radio" name="rbBuscar" id="rbNombre" value="nombre"> Nombre
+				<input type="text" id="txtBuscar" value="">
+			</p>
+		</div>
+		<div id="lista_cuentas" style="display: none;"></div>
+	</div>
+</script>
+
+<script id="tmp_cuenta" type="text/template">
+	<div class="usuario">
+		<div id="cont-item-usuario">
+			<label>Nombre:  </label><%= nombre %>
+			<label>Apellidos:  </label> <%= apellido.primero %> <%= apellido.segundo %></br>
+			<label>Email:  </label><%= mail %></br>
+			<label>Dirección:  </label><%= direccion %></br>
+			<label>Télefono:  </label><%= telefono %></br>
+		</div>
+	</div>
+</script>
+
+
+
